@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:pv="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_blue_dark">
+
+    <me.wangyuwei.particleview.ParticleView
+        android:id="@+id/picview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        pv:pv_background_color="#2e2e2e"
+        pv:pv_host_text="BLETOOTH"
+        pv:pv_particle_text="南风"
+        pv:pv_particle_text_size="12sp"
+        pv:pv_text_color="#FFF" />
+</RelativeLayout>
