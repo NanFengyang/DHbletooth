@@ -1,10 +1,13 @@
 package com.yyt.blue.bluetooth;
 
 import android.annotation.TargetApi;
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,6 +16,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.litesuits.bluetooth.LiteBleGattCallback;
 import com.litesuits.bluetooth.LiteBluetooth;
@@ -46,7 +50,7 @@ public class BleToothHelper {
     private final static int TIME_OUT_SCAN = 10000;//默认扫描时间20秒
     public static int TIME_OUT_SCAN_TYPE = 1;//查询超时
     private static List<BleToothCallBack> mCallBackList = new ArrayList<>();
-    private AudioManager mAudioManager;
+
 
     public BleToothHelper(Context context) {
         if (mLiteBluetooth == null) {//单例处理
@@ -57,9 +61,17 @@ public class BleToothHelper {
     }
 
     /**
+     * 开启蓝牙
+     */
+    public void openBlueTooth() {
+        mLiteBluetooth.enableBluetooth();
+    }
+
+    /**
      * 查找附近设备
      */
     public void scanDevicesPeriod() {
+        openBlueTooth();
         mLiteBluetooth.startLeScan(new PeriodScanCallback(TIME_OUT_SCAN) {
             @Override
             public void onScanTimeout() {
@@ -72,6 +84,7 @@ public class BleToothHelper {
                 BleLog.i(TAG, "device: " + device.getName() + "  mac: " + device.getAddress()
                         + "  rssi: " + rssi + "  scanRecord: " + Arrays.toString(scanRecord));
                 sendScanDeviceCallBack(device, rssi, scanRecord);
+
             }
         });
     }
@@ -81,7 +94,7 @@ public class BleToothHelper {
      *
      * @param device
      */
-    public void connectAndConnectServiceDevice(final BluetoothDevice device) {
+    public void connectAndConnectServiceDevice(final Context context, final BluetoothDevice device) {
         mLiteBluetooth.stopScan(null);//停止查询
         mLiteBluetooth.connect(device, true, new LiteBleGattCallback() {
             @Override
@@ -98,6 +111,7 @@ public class BleToothHelper {
                 byte[] dataToWrite = parseHexStringToBytes("8865");
                 writeDataToCharacteristic(bluetoothGatt, Characteristic, dataToWrite);//写入
                 sendConnectSuccessCallBack(device, bluetoothGatt, Characteristic);
+
             }
 
             @Override
@@ -106,7 +120,9 @@ public class BleToothHelper {
                 sendFailureCallBack(e.toString());
             }
         });
+
     }
+
 
     /**
      * 蓝牙特征服务连接回调
@@ -147,32 +163,27 @@ public class BleToothHelper {
     /**
      * 关闭蓝牙SCO通道
      */
-    public void stopAudioWay() {
+    public void stopAudio() {
         if (null != mAudioManager) {
             mAudioManager.setBluetoothScoOn(false);
             mAudioManager.stopBluetoothSco();
         }
     }
 
-    /**
-     * 切换蓝牙语音通道
-     */
-    public void changeAudioWay(Context context) {
+    private AudioManager mAudioManager;
+
+    //开启蓝牙通道
+    public void startAudio(Context context) {
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.setMode(AudioManager.MODE_RINGTONE);//不能改，千万不能改
         mAudioManager.setSpeakerphoneOn(true);
-        mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         if (!mAudioManager.isBluetoothScoAvailableOffCall()) {
-            Log.d(TAG, "系统不支持蓝牙录音");
+            Log.d("bluetooh_myapp", "系统不支持蓝牙录音");
             return;
         }
-        mAudioManager.setBluetoothScoOn(false);
-        mAudioManager.stopBluetoothSco();
-        /**
-         * 先关闭之前的通道，再重新开启
-         */
         //蓝牙录音的关键，启动SCO连接，耳机话筒才起作用
         mAudioManager.startBluetoothSco();
-        //蓝牙SCO连接建立需要时间，连接建立后会发出ACTION_SCO_AUDIO_STATE_CHANGED消息，通过接收该消息而进入后续逻辑。
+        //蓝牙SCO连接建立需要时间，连接建立后会发出ACTION_SCO_AUDIO_STATE_CHANGED消息，通过接收该消息而进入后续逻辑。o
         //也有可能此时SCO已经建立，则不会收到上述消息，可以startBluetoothSco()前先stopBluetoothSco()
         context.registerReceiver(new BroadcastReceiver() {
             @Override

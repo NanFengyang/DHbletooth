@@ -104,7 +104,7 @@ public class ScanBlueToothActivity extends AppCompatActivity implements AdapterV
         BluetoothDevice device = mListViewAdapter.getItem(i);
         showToast("连接设备：" + device.getName() + " mac:" + device.getAddress());
         //绑定服务  开启服务
-        mBleToothHelper.connectAndConnectServiceDevice(device);
+        mBleToothHelper.connectAndConnectServiceDevice(this, device);
     }
 
 

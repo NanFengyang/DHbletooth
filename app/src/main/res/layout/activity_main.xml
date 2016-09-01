@@ -12,11 +12,26 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/scan_blue"
-            android:layout_width="200dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="45dp"
-            android:text="搜索蓝牙" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/scan_blue"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:text="搜索蓝牙" />
+
+            <Button
+                android:id="@+id/callphone"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:text="拨打电话" />
+        </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"

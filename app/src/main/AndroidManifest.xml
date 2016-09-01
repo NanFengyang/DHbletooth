@@ -24,6 +24,17 @@
         </activity>
         <activity android:name=".ScanBlueToothActivity" />
         <activity android:name=".MainActivity"></activity>
+
+        <service
+            android:name=".linphone.LinphoneService"
+            android:label="Linphone Service"
+            android:stopWithTask="false" />
+        <receiver android:name=".linphone.KeepAliveHandler" />
+        <receiver android:name=".linphone.NetworkManager">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

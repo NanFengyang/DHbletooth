@@ -12,19 +12,21 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.nanfeng.linphonelibrary.activity.WellcomeActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private Button mScanBtn;
+    private Button mScanBtn, mCallPhone;
     private TextView mBleTooth, mClassicTooth;
     private ListView mLoglistview;
     private List<String> mLogList = new ArrayList<>();
     private ListViewAdapter mListViewAdapter;
     private ImageView mFM;
     private BleToothHelper mBleToothHelper;
+    private Boolean isChangle = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +36,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
+
         mScanBtn = (Button) findViewById(R.id.scan_blue);
+        mCallPhone = (Button) findViewById(R.id.callphone);
         mBleTooth = (TextView) findViewById(R.id.ble_blue);
         mClassicTooth = (TextView) findViewById(R.id.classic_blue);
         mLoglistview = (ListView) findViewById(R.id.listlog_blue);
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mListViewAdapter = new ListViewAdapter(this, mLogList);
         mLoglistview.setAdapter(mListViewAdapter);
         mScanBtn.setOnClickListener(this);
+        mCallPhone.setOnClickListener(this);
         mBleToothHelper = new BleToothHelper(this);
         BleToothHelper.addCallBack(new BleToothCallBack() {
             @Override
@@ -57,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             void onConnectSuccess(final BluetoothDevice device, BluetoothGatt bluetoothGatt, BluetoothGattCharacteristic Characteristic) {
                 addLog("onConnectSuccess:" + device.getName() + "  MAC:" + device.getAddress());
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -70,12 +76,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        addLog("value:" + value);
                         switch (value) {
                             case "FM":
                                 mFM.setVisibility(View.VISIBLE);
                                 break;
                             case "PTT0":
                                 mFM.setVisibility(View.GONE);
+                                break;
+                            case "PTT1":
+                                if (isChangle) {
+                                    isChangle = false;
+                                }
+                                break;
+                            case "PTT2":
+                                isChangle = true;
                                 break;
                         }
                     }
@@ -85,6 +100,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
     /**
      * 添加数据，逆序
@@ -108,6 +127,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.scan_blue:
                 Intent intent = new Intent(MainActivity.this, ScanBlueToothActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.callphone:
+                Intent intent1 = new Intent(MainActivity.this, WellcomeActivity.class);
+                startActivity(intent1);
                 break;
         }
     }
